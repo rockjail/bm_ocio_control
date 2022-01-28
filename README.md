@@ -10,7 +10,7 @@ When opening a scene that uses a different OCIO config and settings than current
 ### FX item Scene Properties extension
 The FX item displays the OCIO settings for the current scene. This kit adds two buttons.
 
-![Scene properties addition](screenshots\scene_properties.png)
+![Scene properties addition](screenshots/scene_properties.png)
 
 ## Installation
 Copy to a kit folder within Modo's User Kits folder (or any other Modo import directory)
