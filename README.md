@@ -15,8 +15,8 @@ The FX item displays the OCIO settings for the current scene. This kit adds two 
 ## Installation
 Copy to a kit folder within Modo's User Kits folder (or any other Modo import directory)
 
-Windows: %APPDATA%/Luxology/Kits
-Mac: ~/Library/Application Support/Luxology/Kits
+Windows: %APPDATA%/Luxology/Kits\
+Mac: ~/Library/Application Support/Luxology/Kits\
 Linux: ~/.luxology/Kits
 
 Once setup the path to index.cfg should be .../Luxology/Kits/bm_ocio_control/index.cfg
