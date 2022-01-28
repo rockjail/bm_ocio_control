@@ -8,6 +8,7 @@ svc_listen = lx.service.Listener()
 svc_commnad = lx.service.Command()
 
 sCMD_UPDATE_OCIO_PREFS = "bm.updateOCIOprefs"
+sCMD_UPDATE_SCENE_OCIO = "bm.updateSceneOCIO"
 
 sCMD_PREF_OCIO = "pref.value colormanagement.default_ocio_config"
 sCMD_PREF_8BIT = "pref.value colormanagement.8bit_default_colorspace"
@@ -86,6 +87,28 @@ Do you want to change preferences to match scene?",
         return lx.symbol.fCMD_UI
 
 
+class cmd_UpdateSceneOCIO(lxu.command.BasicCommand):
+
+    def __init__(self):
+        lxu.command.BasicCommand.__init__(self)
+
+    def basic_Execute(self, msg, flags):
+        scene = modo.Scene()
+        pref_ocio = lx.eval("%s ?" % sCMD_PREF_OCIO)
+        pref_8bit = lx.eval("%s ?" % sCMD_PREF_8BIT)
+        pref_16bit = lx.eval("%s ?" % sCMD_PREF_16BIT)
+        pref_float = lx.eval("%s ?" % sCMD_PREF_FLOAT)
+
+        scene_ocio = scene.sceneItem.channel("ocioConfig").set(pref_ocio)
+        scene_8bit = scene.sceneItem.channel("def8bitColorspace").set(pref_8bit)
+        scene_16bit = scene.sceneItem.channel("def16bitColorspace").set(pref_16bit)
+        scene_float = scene.sceneItem.channel("defFloatColorspace").set(pref_float)
+
+    def cmd_Flags(self):
+        return lx.symbol.fCMD_UNDO
+
+
 lx.bless(cmd_UpdateOcioPrefs, sCMD_UPDATE_OCIO_PREFS)
+lx.bless(cmd_UpdateSceneOCIO, sCMD_UPDATE_SCENE_OCIO)
 
 cmdListener1 = CmdListener()
