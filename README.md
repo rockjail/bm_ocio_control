@@ -4,10 +4,12 @@ This kit for Modo bundles handy functions that help when working with different 
 ## General
 ### Scene Open Warning
 When opening a scene that uses a different OCIO config and settings than current Preferences a dialog shown asking to match the Preferences to the current scene settings.
+
 ![Match OCIO preferences to Scene](screenshots/dialog_OCIO_difference.png)
 
 ### FX item Scene Properties extension
 The FX item displays the OCIO settings for the current scene. This kit adds two buttons.
+
 ![Scene properties addition](screenshots\scene_properties.png)
 
 ## Installation
