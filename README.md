@@ -1,6 +1,7 @@
 # bm_ocio_control
 This kit for Modo bundles handy functions that help when working with different OCIO configs.
 
+## General
 ### Scene Open Warning
 When opening a scene that uses a different OCIO config and settings than current Preferences a dialog shown asking to match the Preferences to the current scene settings.
 ![Match OCIO preferences to Scene](screenshots/dialog_OCIO_difference.png)
