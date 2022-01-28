@@ -30,7 +30,7 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
         if self.armed:
             cmd = lx.object.Command(cmd)
             if cmd.Name() in ("scene.open", "scene.set"):
-                lx.eval(f"{sCMD_UPDATE_OCIO_PREFS} ask:true")
+                lx.eval("%s ask:true" % sCMD_UPDATE_OCIO_PREFS)
 
 
 class cmd_UpdateOcioPrefs(lxu.command.BasicCommand):
@@ -50,12 +50,12 @@ class cmd_UpdateOcioPrefs(lxu.command.BasicCommand):
 
         # ask user if the argument is set
         if arg_ask:
-            pref_ocio = lx.eval(f"{sCMD_PREF_OCIO} ?")
-            pref_8bit = lx.eval(f"{sCMD_PREF_8BIT} ?")
-            pref_16bit = lx.eval(f"{sCMD_PREF_16BIT} ?")
-            pref_float = lx.eval(f"{sCMD_PREF_FLOAT} ?")
-            # pref_num = lx.eval(f"{sCMD_PREF_NUM} ?")
-            # pref_view = lx.eval(f"{sCMD_PREF_VIEW} ?")
+            pref_ocio = lx.eval("%s ?" % sCMD_PREF_OCIO)
+            pref_8bit = lx.eval("%s ?" % sCMD_PREF_8BIT)
+            pref_16bit = lx.eval("%s ?" % sCMD_PREF_16BIT)
+            pref_float = lx.eval("%s ?" % sCMD_PREF_FLOAT)
+            # pref_num = lx.eval("%s ?" % sCMD_PREF_NUM)
+            # pref_view = lx.eval("%s ?" % sCMD_PREF_VIEW)
             if any(
                 [
                     scene_ocio != pref_ocio,
@@ -73,14 +73,14 @@ Do you want to change preferences to match scene?",
                 if ask == "no":
                     return
         
-        lx.eval(f'{sCMD_PREF_OCIO} "{scene_ocio}"')
-        lx.eval(f'{sCMD_PREF_8BIT} "{scene_8bit}"')
-        lx.eval(f'{sCMD_PREF_16BIT} "{scene_16bit}"')
-        lx.eval(f'{sCMD_PREF_FLOAT} "{scene_float}"')
-        lx.eval(f'{sCMD_PREF_NUM} "{scene_8bit}"')
+        lx.eval('%s "%s"' % (sCMD_PREF_OCIO, scene_ocio))
+        lx.eval('%s "%s"' % (sCMD_PREF_8BIT, scene_8bit))
+        lx.eval('%s "%s"' % (sCMD_PREF_16BIT, scene_16bit))
+        lx.eval('%s "%s"' % (sCMD_PREF_FLOAT, scene_float))
+        lx.eval('%s "%s"' % (sCMD_PREF_NUM, scene_8bit))
         # TODO: figure out better way to handle default view space
         # right now assuming people work with sRGB monitor and that profile exists on all OCIO configs used
-        lx.eval(f'{sCMD_PREF_VIEW} "{scene_ocio}:sRGB"')
+        lx.eval('%s "%s:sRGB"' % (sCMD_PREF_VIEW, scene_ocio))
 
     def cmd_Flags(self):
         return lx.symbol.fCMD_UI
