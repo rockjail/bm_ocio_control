@@ -5,7 +5,7 @@ import modo  # type: ignore
 import lxifc  # type: ignore
 
 svc_listen = lx.service.Listener()
-svc_commnad = lx.service.Command()
+svc_command = lx.service.Command()
 
 sCMD_UPDATE_OCIO_PREFS = "bm.updateOCIOprefs"
 sCMD_UPDATE_SCENE_OCIO = "bm.updateSceneOCIO"
@@ -30,8 +30,15 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
     def cmdsysevent_ExecutePost(self, cmd, isSandboxed, isPostCmd):
         if self.armed:
             cmd = lx.object.Command(cmd)
-            if cmd.Name() in ("scene.open", "scene.set"):
+            cmd_name = cmd.Name()
+            cmd_args = svc_command.ArgsAsString(cmd, False)
+            if cmd_name in ("scene.open", "scene.set"):
                 lx.eval("%s ask:true" % sCMD_UPDATE_OCIO_PREFS)
+            if cmd_name == "item.channel" and "scene$ocioConfig" in cmd_args:
+                print("switched scene ocio")
+            if cmd_name == "pref.value" and " colormanagement.default_ocio_config" in cmd_args:
+                print("switches prefs OCIO")
+
 
 
 class cmd_UpdateOcioPrefs(lxu.command.BasicCommand):
