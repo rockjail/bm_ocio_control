@@ -8,7 +8,7 @@ When opening a scene that uses a different OCIO config and settings than current
 ![Match OCIO preferences to Scene](screenshots/dialog_OCIO_difference.png)
 
 ### FX item Scene Properties extension
-The FX item displays the OCIO settings for the current scene. This kit adds two buttons.
+The FX item displays the OCIO settings for the current scene. This kit adds three buttons.
 
 ![Scene properties addition](screenshots/scene_properties.png)
 
