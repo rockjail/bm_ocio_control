@@ -23,9 +23,18 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
         self.com_obj = lx.object.Unknown(self)
         svc_listen.AddListener(self.com_obj)
         self.armed = True
+        self.pre_scene = None
 
     def __del__(self):
         svc_listen.RemoveListener(self.com_obj)
+
+    def cmdsysevent_ExecutePre(self, cmd, type, isSandboxed, isPostCmd):
+        if self.armed:
+            cmd = lx.object.Command(cmd)
+            cmd_name = cmd.Name()
+            if cmd_name in ("scene.open", "scene.set"):
+                scene = lx.eval("scene.set ?")
+                self.pre_scene = scene
 
     def cmdsysevent_ExecutePost(self, cmd, isSandboxed, isPostCmd):
         if self.armed:
@@ -33,7 +42,9 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
             cmd_name = cmd.Name()
             cmd_args = svc_command.ArgsAsString(cmd, False)
             if cmd_name in ("scene.open", "scene.set"):
-                lx.eval("%s ask:true" % sCMD_UPDATE_OCIO_PREFS)
+                scene = lx.eval("scene.set ?")
+                if scene != self.pre_scene:
+                    lx.eval("%s ask:true" % sCMD_UPDATE_OCIO_PREFS)
             if cmd_name == "item.channel" and "scene$ocioConfig" in cmd_args:
                 print("switched scene ocio")
             if cmd_name == "pref.value" and " colormanagement.default_ocio_config" in cmd_args:
