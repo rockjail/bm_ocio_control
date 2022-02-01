@@ -47,16 +47,17 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
                     lx.eval("%s ask:true" % sCMD_UPDATE_OCIO_PREFS)
             if cmd_name == "item.channel" and "scene$ocioConfig" in cmd_args:
                 print("switched scene ocio")
-            if cmd_name == "pref.value" and " colormanagement.default_ocio_config" in cmd_args:
+            if (
+                cmd_name == "pref.value"
+                and " colormanagement.default_ocio_config" in cmd_args
+            ):
                 print("switches prefs OCIO")
 
 
-
 class cmd_UpdateOcioPrefs(lxu.command.BasicCommand):
-
     def __init__(self):
         lxu.command.BasicCommand.__init__(self)
-        self.dyna_Add('ask', lx.symbol.sTYPE_BOOLEAN)
+        self.dyna_Add("ask", lx.symbol.sTYPE_BOOLEAN)
         self.basic_SetFlags(0, lx.symbol.fCMDARG_OPTIONAL)
 
     def basic_Execute(self, msg, flags):
@@ -91,14 +92,15 @@ Do you want to change preferences to match scene?",
                 # return early if user clicks no
                 if ask == "no":
                     return
-        
+
         lx.eval('%s "%s"' % (sCMD_PREF_OCIO, scene_ocio))
         lx.eval('%s "%s"' % (sCMD_PREF_8BIT, scene_8bit))
         lx.eval('%s "%s"' % (sCMD_PREF_16BIT, scene_16bit))
         lx.eval('%s "%s"' % (sCMD_PREF_FLOAT, scene_float))
         lx.eval('%s "%s"' % (sCMD_PREF_NUM, scene_8bit))
         # TODO: figure out better way to handle default view space
-        # right now assuming people work with sRGB monitor and that profile exists on all OCIO configs used
+        # right now assuming people work with sRGB monitor and
+        # that profile exists on all OCIO configs used
         lx.eval('%s "%s:sRGB"' % (sCMD_PREF_VIEW, scene_ocio))
 
     def cmd_Flags(self):
@@ -106,7 +108,6 @@ Do you want to change preferences to match scene?",
 
 
 class cmd_UpdateSceneOCIO(lxu.command.BasicCommand):
-
     def __init__(self):
         lxu.command.BasicCommand.__init__(self)
 
@@ -117,10 +118,10 @@ class cmd_UpdateSceneOCIO(lxu.command.BasicCommand):
         pref_16bit = lx.eval("%s ?" % sCMD_PREF_16BIT)
         pref_float = lx.eval("%s ?" % sCMD_PREF_FLOAT)
 
-        scene_ocio = scene.sceneItem.channel("ocioConfig").set(pref_ocio)
-        scene_8bit = scene.sceneItem.channel("def8bitColorspace").set(pref_8bit)
-        scene_16bit = scene.sceneItem.channel("def16bitColorspace").set(pref_16bit)
-        scene_float = scene.sceneItem.channel("defFloatColorspace").set(pref_float)
+        scene.sceneItem.channel("ocioConfig").set(pref_ocio)
+        scene.sceneItem.channel("def8bitColorspace").set(pref_8bit)
+        scene.sceneItem.channel("def16bitColorspace").set(pref_16bit)
+        scene.sceneItem.channel("defFloatColorspace").set(pref_float)
 
     def cmd_Flags(self):
         return lx.symbol.fCMD_UNDO
