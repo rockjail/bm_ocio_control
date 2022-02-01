@@ -9,6 +9,8 @@ svc_command = lx.service.Command()
 
 sCMD_UPDATE_OCIO_PREFS = "bm.updateOCIOprefs"
 sCMD_UPDATE_SCENE_OCIO = "bm.updateSceneOCIO"
+sCMD_SWAP_SCENE_OCIO = "bm.swapSceneOCIO"
+sCMD_SWAP_OCIO_PREFS = "bm.swapOCIOPrefs"
 
 sCMD_PREF_OCIO = "pref.value colormanagement.default_ocio_config"
 sCMD_PREF_8BIT = "pref.value colormanagement.8bit_default_colorspace"
@@ -17,6 +19,24 @@ sCMD_PREF_FLOAT = "pref.value colormanagement.float_default_colorspace"
 sCMD_PREF_NUM = "pref.value colormanagement.numeric_default_colorspace"
 sCMD_PREF_VIEW = "pref.value colormanagement.view_default_colorspace"
 
+tOCIO_PREFS = (
+    sCMD_PREF_OCIO,
+    sCMD_PREF_8BIT,
+    sCMD_PREF_16BIT,
+    sCMD_PREF_FLOAT,
+    sCMD_PREF_NUM,
+    sCMD_PREF_VIEW,
+)
+
+
+sOCIO_CHANNEL = "ocioConfig"
+tOCIO_DEF_CHANNELS = (
+    sOCIO_CHANNEL,
+    "def8bitColorspace",
+    "def16bitColorspace",
+    "defFloatColorspace",
+)
+
 
 class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
     def __init__(self):
@@ -24,6 +44,7 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
         svc_listen.AddListener(self.com_obj)
         self.armed = True
         self.pre_scene = None
+        self.cache = dict()
 
     def __del__(self):
         svc_listen.RemoveListener(self.com_obj)
@@ -32,9 +53,22 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
         if self.armed:
             cmd = lx.object.Command(cmd)
             cmd_name = cmd.Name()
+            cmd_args = svc_command.ArgsAsString(cmd, False)
             if cmd_name in ("scene.open", "scene.set"):
                 scene = lx.eval("scene.set ?")
                 self.pre_scene = scene
+            if cmd_name == "item.channel" and "scene$ocioConfig" in cmd_args:
+                scene = modo.Scene()
+                for ch in tOCIO_DEF_CHANNELS:
+                    self.cache[ch] = scene.sceneItem.channel(ch).get()
+                print(self.cache)
+            if (
+                cmd_name == "pref.value"
+                and "colormanagement.default_ocio_config" in cmd_args
+            ):
+                for pref in tOCIO_PREFS:
+                    self.cache[pref] = lx.eval("%s ?" % pref)
+                print(self.cache)
 
     def cmdsysevent_ExecutePost(self, cmd, isSandboxed, isPostCmd):
         if self.armed:
@@ -46,12 +80,28 @@ class CmdListener(lxifc.CmdSysListener, lxifc.SceneItemListener):
                 if scene != self.pre_scene:
                     lx.eval("%s ask:true" % sCMD_UPDATE_OCIO_PREFS)
             if cmd_name == "item.channel" and "scene$ocioConfig" in cmd_args:
-                print("switched scene ocio")
+                cmd = sCMD_SWAP_SCENE_OCIO
+                for ch in tOCIO_DEF_CHANNELS:
+                    cmd += " %s:{%s}" % (ch, self.cache[ch])
+                print(cmd)
+                lx.eval(cmd)
             if (
                 cmd_name == "pref.value"
-                and " colormanagement.default_ocio_config" in cmd_args
+                and "colormanagement.default_ocio_config" in cmd_args
             ):
-                print("switches prefs OCIO")
+                cmd = sCMD_SWAP_OCIO_PREFS
+                for pref in tOCIO_PREFS:
+                    print(pref)
+                    pref_val = pref.split(" ")[1]
+                    cmd += " %s:{%s}" % (pref_val, self.cache[pref])
+                print(cmd)
+                try:
+                    self.armed = False
+                    lx.eval(cmd)
+                except:
+                    print("error")
+                finally:
+                    self.armed = True
 
 
 class cmd_UpdateOcioPrefs(lxu.command.BasicCommand):
@@ -127,7 +177,51 @@ class cmd_UpdateSceneOCIO(lxu.command.BasicCommand):
         return lx.symbol.fCMD_UNDO
 
 
+class cmd_SwapSceneOCIO(lxu.command.BasicCommand):
+    def __init__(self):
+        lxu.command.BasicCommand.__init__(self)
+        for ch in tOCIO_DEF_CHANNELS:
+            self.dyna_Add(ch, lx.symbol.sTYPE_STRING)
+
+    def basic_Execute(self, msg, flags):
+        scene_ocio_old = self.dyna_String(self.attr_Lookup(sOCIO_CHANNEL), "")
+        scene = modo.Scene()
+        scene_ocio = scene.sceneItem.channel(sOCIO_CHANNEL).get()
+
+        for ch in tOCIO_DEF_CHANNELS:
+            val = self.dyna_String(self.attr_Lookup(ch), "")
+            val = val.replace(scene_ocio_old, scene_ocio)
+            scene.sceneItem.channel(ch).set(val)
+
+    def cmd_Flags(self):
+        return lx.symbol.fCMD_UNDO
+
+
+class cmd_SwapOCIOPrefs(lxu.command.BasicCommand):
+    def __init__(self):
+        lxu.command.BasicCommand.__init__(self)
+        for pref in tOCIO_PREFS:
+            pref = pref.split(" ")[1]
+            self.dyna_Add(pref, lx.symbol.sTYPE_STRING)
+
+    def basic_Execute(self, msg, flags):
+        pref_ocio_old = self.dyna_String(
+            self.attr_Lookup(sCMD_PREF_OCIO.split(" ")[1]), ""
+        )
+        pref_ocio = lx.eval("%s ?" % sCMD_PREF_OCIO)
+        for pref in tOCIO_PREFS:
+            pref_val = pref.split(" ")[1]
+            val = self.dyna_String(self.attr_Lookup(pref_val), "")
+            val = val.replace(pref_ocio_old, pref_ocio)
+            lx.eval("%s {%s}" % (pref, val))
+
+    def cmd_Flags(self):
+        return lx.symbol.fCMD_UNDO
+
+
 lx.bless(cmd_UpdateOcioPrefs, sCMD_UPDATE_OCIO_PREFS)
 lx.bless(cmd_UpdateSceneOCIO, sCMD_UPDATE_SCENE_OCIO)
+lx.bless(cmd_SwapSceneOCIO, sCMD_SWAP_SCENE_OCIO)
+lx.bless(cmd_SwapOCIOPrefs, sCMD_SWAP_OCIO_PREFS)
 
 cmdListener1 = CmdListener()
