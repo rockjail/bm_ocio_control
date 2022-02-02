@@ -12,6 +12,9 @@ The FX item displays the OCIO settings for the current scene. This kit adds thre
 
 ![Scene properties addition](screenshots/scene_properties.png)
 
+### Switiching OCIOs
+Switching between OCIO configs is handled a bit more gracefully. This kit adds a functino that applies the same color space to all default colorspaces when switching OCIO config. Saves a few clicks.
+
 ## Installation
 Copy to a kit folder within Modo's User Kits folder (or any other Modo import directory)
 
