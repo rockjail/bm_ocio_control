@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package version="1300">
+	<kit name="bm_ocio_control" restart="YES">
+		<source target="bm_ocio_control/index.cfg">index.cfg</source>
+		<source target="bm_ocio_control/README.md">README.md</source>
+		<source target="bm_ocio_control/LICENSE">LICENSE</source>
+		<source target="bm_ocio_control/Configs/scene_match_ocio_button.cfg">Configs/scene_match_ocio_button.cfg</source>
+		<source target="bm_ocio_control/Scripts/lxserv/bm_ocio_control.py">Scripts/lxserv/bm_ocio_control.py</source>
+		<source target="bm_ocio_control/screenshots/scene_properties.png">screenshots/scene_properties.png</source>
+		<source target="bm_ocio_control/screenshots/dialog_OCIO_difference.png">screenshots/dialog_OCIO_difference.png</source>
+	</kit>
+	<message button="Help">Succesfully installed bm_ocio_control.</message>
+</package>
